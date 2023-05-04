@@ -11,7 +11,7 @@ mp_holistic = mp.solutions.holistic         # modelo pre-entrenado para reconoce
 # ruta para exportar los datos
 DATA_PATH = os.path.join('mp_data')
 # acciones a detectar
-actions = np.array(['hola'])
+actions = np.array(['no'])
 # cantidad de videos por valor de dato
 no_sequences = 30
 # duracion de videos en cuadros frames
@@ -143,7 +143,6 @@ menor a la de MIN_DETECTION_CONFIDENCE, no se considerara el objeto
 min_tracking_confidence: ajusta el seguimiento del objeto, 
     por defecto: 0.5
 """
-value = False
 # modelo mediapipe
 with mp_holistic.Holistic(
     static_image_mode=False,
@@ -178,10 +177,8 @@ with mp_holistic.Holistic(
                     cv2.imshow('MediaPipe Feed', image)
                     cv2.waitKey(2000)
                 else:
-                    cv2.putText(image,
-                                'Recopilacion de fotogramas para {} Numero de video {}'.format(action, sequence),
-                                (15, 12),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+                    cv2.putText(image, 'Recopilacion de fotogramas para {} Numero de video {}'.format(action, sequence),
+                                (15, 12), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
                     # Mostrar en pantalla
                     cv2.imshow('MediaPipe Feed', image)
 
@@ -190,9 +187,9 @@ with mp_holistic.Holistic(
                 npy_path = os.path.join(DATA_PATH, action, str(sequence), str(frame_num))
                 np.save(npy_path, keypoints)
 
-            # Break gracefully
-            if cv2.waitKey(10) & 0xFF == 13:
-                break
+                # Break gracefully
+                if cv2.waitKey(10) & 0xFF == 27:
+                    break
 
     capture.release()
     cv2.destroyAllWindows()

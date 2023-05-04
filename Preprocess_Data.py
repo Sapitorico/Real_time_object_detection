@@ -5,21 +5,18 @@ import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.layers import BatchNormalization
 
 #-------------------------[ Rutas y tamaños de datos ]--------------------------------
-# definir la ruta donde se encuentran los datos
 DATA_PATH = os.path.join('mp_data')
 # definir las acciones a detectar
-actions = np.array(['hola'])
+actions = np.array(['hola', 'como estas', 'vos', 'bien', 'mal', 'mas o menos', 'nos vemos', 'gracias', 'muchas gracias',
+                    'de nada', 'encantado'])
 # cantidad de videos por valor de dato
 no_sequences = 30
 # duracion de videos en cuadros frames
 sequence_length = 30
 
-# definir la ruta donde se guardará el registro del entrenamiento
-log_dir = os.path.join('Logs')
-# definir el callback de TensorBoard
-tb_callback = TensorBoard(log_dir=log_dir)
 
 # crear un diccionario para mapear las etiquetas de las acciones a números
 label_map = {label:num for num, label in enumerate(actions)}
@@ -63,26 +60,51 @@ En la implementación de este modelo, el vector de características de cada foto
 construye mediante la concatenación de los vectores de características de la pose, la cara
 y las manos, que tienen tamaños de 132, 1404 y 63x2=126, respectivamente, lo que da un total de 1662.
 """
+# definir la ruta donde se guardará el registro del entrenamiento
+log_dir = os.path.join('Logs')
+# definir el callback de TensorBoard
+tb_callback = TensorBoard(log_dir=log_dir)
 
 model = Sequential()
 model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,1662)))
-model.add(Dropout(0.2))     # 20% de las neuronas seran desactivadas
+model.add(BatchNormalization())
+model.add(Dropout(0.2))
 model.add(LSTM(128, return_sequences=True, activation='relu'))
+model.add(BatchNormalization())
 model.add(Dropout(0.2))
 model.add(LSTM(64, return_sequences=False, activation='relu'))
+model.add(BatchNormalization())
 model.add(Dropout(0.2))
 model.add(Dense(64, activation='relu'))
+model.add(BatchNormalization())
 model.add(Dropout(0.2))
 model.add(Dense(32, activation='relu'))
+model.add(BatchNormalization())
 model.add(Dropout(0.2))
 model.add(Dense(actions.shape[0], activation='softmax'))
-
+# model = Sequential()
+# model.add(LSTM(64, return_sequences=True, activation='relu', input_shape=(30,1662)))
+# model.add(Dropout(0.2))     # 20% de las neuronas seran desactivadas
+# model.add(LSTM(128, return_sequences=True, activation='relu'))
+# model.add(Dropout(0.2))
+# model.add(LSTM(64, return_sequences=False, activation='relu'))
+# model.add(Dropout(0.2))
+# model.add(Dense(64, activation='relu'))
+# model.add(Dropout(0.2))
+# model.add(Dense(32, activation='relu'))
+# model.add(Dropout(0.2))
+# model.add(Dense(actions.shape[0], activation='softmax'))
+#
 #--------------------[ Compilar el modelo ]-----------------------
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 
 #------------------------[ Entrenar el modelo ]-----------------
-model.fit(X_train, y_train, epochs=2000, callbacks=[tb_callback])
+model.fit(X_train, y_train, epochs=300, callbacks=[tb_callback])
+
 #-------------------[ Imprimir un resumen del modelo ]------------------
 model.summary()
+model_json = model.to_json()
+with open("model.json", "w") as json_file:
+    json_file.write(model_json)
 #----------------------[ Guardar el modelo ]---------------------
 model.save('action.h5')

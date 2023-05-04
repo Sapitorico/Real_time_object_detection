@@ -25,31 +25,31 @@ def draw_landmarks(image, results):
         image,                      # imagen preprocesada donde se dibujara los resputados del reconocimineto
         results.face_landmarks,     # conjutno de puntos que se detectaron en el rostro
         mp_holistic.FACEMESH_TESSELATION,   # puntos de referencia que se van a dbujar
-        mp_drawing.DrawingSpec(color=(0, 255, 255), thickness=1, circle_radius=1),  # color pixel de los puntos
-        mp_drawing.DrawingSpec(color=(0, 128, 255), thickness=1)    # color y pixel de las conceciones entre cada putno
+        mp_drawing.DrawingSpec(color=(255, 204, 204), thickness=1, circle_radius=1),  # color pixel de los puntos
+        mp_drawing.DrawingSpec(color=(204, 102, 102), thickness=1)    # color y pixel de las conceciones entre cada putno
     )
     # mano izquierda:
     mp_drawing.draw_landmarks(
         image,
         results.left_hand_landmarks,    # lista de puntos de referencia de la mano izquierda
         mp_holistic.HAND_CONNECTIONS,   # coneciones entre los puntos
-        mp_drawing.DrawingSpec(color=(255, 255, 0), thickness=2, circle_radius=1),
-        mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=2)
+        mp_drawing.DrawingSpec(color=(204, 204, 0), thickness=2, circle_radius=1),
+        mp_drawing.DrawingSpec(color=(255, 102, 102), thickness=2)
     )
     # mano derecha:
     mp_drawing.draw_landmarks(
         image,
         results.right_hand_landmarks,   # puntos de referencia de la mano derecha
         mp_holistic.HAND_CONNECTIONS,
-        mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=1),
-        mp_drawing.DrawingSpec(color=(53, 143, 0), thickness=2)
+        mp_drawing.DrawingSpec(color=(102, 204, 102), thickness=2, circle_radius=1),
+        mp_drawing.DrawingSpec(color=(0, 102, 0), thickness=2)
     )
     # postura:
     mp_drawing.draw_landmarks(
         image,
         results.pose_landmarks,     # puntos de refernecia de las poses del cuerpo
         mp_holistic.POSE_CONNECTIONS,
-        mp_drawing.DrawingSpec(color=(128, 0, 255), thickness=2, circle_radius=1),
+        mp_drawing.DrawingSpec(color=(204, 153, 255), thickness=2, circle_radius=1),
         mp_drawing.DrawingSpec(color=(255, 255, 255), thickness=2)
     )
 
