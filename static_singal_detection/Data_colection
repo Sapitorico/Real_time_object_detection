@@ -1,0 +1,43 @@
+#!/usr/bin/python
+import cv2
+from Base_Model.Detection_tools import Base_Model
+
+DATA_PATH = 'mp_dataset'
+actions = ['a']
+imgSize = 200
+size_data = 1000
+save_frequency = 10
+hand_type = "Right"
+key = 0
+id_cam = 1
+count = 0
+
+Base = Base_Model(DATA_PATH, actions, imgSize, size_data)
+hands = Base.Hands_model_configuration(False, 1, 1)
+
+
+capture = cv2.VideoCapture(id_cam)
+Base.Create_datasets_dir()
+
+with hands as Hands:
+    while capture.isOpened():
+        key = cv2.waitKey(1)
+        success, image = capture.read()
+        if not success:
+            continue
+        image = cv2.flip(image, 1)
+        frame, results = Base.Hands_detection(image, Hands)
+        copie_img = frame.copy()
+        if results.multi_hand_landmarks:
+            positions = []
+            positions = Base.Detect_hand_type(hand_type, results, positions, copie_img)
+            if len(positions) != 0:
+                Base.Draw_Bound_Boxes(positions, frame)
+                resized_hand = Base.Get_bound_boxes(positions, copie_img)
+                # Base.Save_resized_hand(resized_hand, count)
+                # count+=1
+        if key == 27:
+             exit(0)
+        cv2.imshow("image capture", frame)
+    capture.release()
+    cv2.destroyAllWindows()
