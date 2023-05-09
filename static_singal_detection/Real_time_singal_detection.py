@@ -28,8 +28,10 @@ count = 0
 Base = Base_Model(DATA_PATH, actions, imgSize, size_data)
 hands = Base.Hands_model_configuration(False, 1, 1)
 
+predictions = []
+threshold = 0.5
 
-capture = cv2.VideoCapture(0)
+capture = cv2.VideoCapture(1)
 
 with hands as Hands:
     while capture.isOpened():
@@ -44,14 +46,15 @@ with hands as Hands:
             positions = []
             positions = Base.Detect_hand_type(hand_type, results, positions, copie_img)
             if len(positions) != 0:
-                Base.Draw_Bound_Boxes(positions, frame)
+                predicted_action = ""
                 resized_hand = Base.Get_bound_boxes(positions, copie_img)
-                x = img_to_array(resized_hand)
-                x = np.expand_dims(x, axis=0)
-                vector = cnn.predict(x)
-                resultado = vector[0]
-                respuesta = np.argmax(resultado)
-                print(direction[respuesta])
+                img_array = img_to_array(resized_hand)
+                result = cnn.predict(np.expand_dims(img_array, axis=0))[0]
+                predictions.append(np.argmax(result))
+                if np.unique(predictions[-10:])[0] == np.argmax(result):
+                    if result[np.argmax(result)] > threshold:
+                        predicted_action = dire_img[np.argmax(result)]
+                Base.Draw_Bound_Boxes(positions, frame, predicted_action)
         if key == 27:
              exit(0)
         cv2.imshow("image capture", frame)
