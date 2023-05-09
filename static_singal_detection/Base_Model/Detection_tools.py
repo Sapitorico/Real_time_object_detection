@@ -60,7 +60,7 @@ class Base_Model:
                         # Base_Model.Draw_landmarks(copie_img, hand_landmarks)
         return positions
 
-    def Draw_Bound_Boxes(self, positions, frame):
+    def Draw_Bound_Boxes(self, positions, frame, prediction):
         x_min = int(min(positions, key=lambda x: x[0])[0])
         y_min = int(min(positions, key=lambda x: x[1])[1])
         x_max = int(max(positions, key=lambda x: x[0])[0])
@@ -74,6 +74,7 @@ class Base_Model:
                 frame.shape[1]:
             cv2.rectangle(frame, (x1 - self.offset - 50, y1 - self.offset - 25), (x2 - self.offset + 90, y2 - self.offset + 50),
                           (0, 255, 0), 3)
+            cv2.putText(frame, prediction, (x1, y1 - 50), cv2.FONT_HERSHEY_COMPLEX, 1.7, (255, 255, 255), 2)
             # imgHand = copie_img[y1 - offset - 25:y2 - offset + 50, x1 - offset - 50:x2 - offset + 90].copy()
             # return imgHand
 
