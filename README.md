@@ -18,7 +18,7 @@ Basándose en la detección de algunas características escanciale, como la orie
 
 # Boceto de la arquitectura
 
-
+<img width="16384" alt="arquitecutra basica" src="https://github.com/Sapitorico/Real_time_object_detection/assets/105575956/5cfb1e30-0a0f-4913-bb04-052e889c878a">
 
 #  MediaPipe, pre procesar imágenes para crear puntos de referencia
 
