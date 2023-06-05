@@ -2,20 +2,27 @@
 import cv2
 from Base_Model.Detection_tools import Base_Model
 
-DATA_PATH = 'mp_dataset'
-actions = ['a']
-imgSize = 200
-size_data = 1000
+
+# ruta de dataset
+DATA_PATH = 'DATASET/Training'
+# especifica la letra
+actions = ['Z']
+imgSize = 224
+# cantidad de datos
+size_data = 100
 save_frequency = 10
-hand_type = "Right"
+# Left Right
+hand_type = "Left"
 key = 0
-id_cam = 1
+# ide de la camara
+id_cam = 0
 count = 0
 
 Base = Base_Model(DATA_PATH, actions, imgSize, size_data)
 hands = Base.Hands_model_configuration(False, 1, 1)
 
 
+k = 0
 capture = cv2.VideoCapture(id_cam)
 Base.Create_datasets_dir()
 
@@ -30,12 +37,18 @@ with hands as Hands:
         copie_img = frame.copy()
         if results.multi_hand_landmarks:
             positions = []
-            positions = Base.Detect_hand_type(hand_type, results, positions, copie_img)
+            positions, key_points = Base.Detect_hand_type(hand_type, results, positions, copie_img)
             if len(positions) != 0:
                 Base.Draw_Bound_Boxes(positions, frame)
                 resized_hand = Base.Get_bound_boxes(positions, copie_img)
-                # Base.Save_resized_hand(resized_hand, count)
-                # count+=1
+                cv2.imshow("image", resized_hand)
+                print(count)
+                if key == 115:
+                    # presiona la s para empezar a recolectar
+                    k = 1
+                if k == 1:
+                   Base.Save_resized_hand(resized_hand, count, hand_type)
+                   count+=1
         if key == 27:
              exit(0)
         cv2.imshow("image capture", frame)

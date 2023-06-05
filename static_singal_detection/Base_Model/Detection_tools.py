@@ -2,12 +2,14 @@
 import cv2
 import mediapipe as mp  # libreria de redes de reconocimiento de articulaciones
 import os
+import numpy as np
 
 # -------[ Modelo de reconocimiento de articulaciones ]------------------------------
 #inicilisamos el modelo de detecion de manos
 mp_hands = mp.solutions.hands
 #funcion para visulaizar el resultado en puntos de referencia
 mp_drawing = mp.solutions.drawing_utils
+mp_drawing_styles = mp.solutions.drawing_styles
 
 
 class Base_Model:
@@ -45,11 +47,14 @@ class Base_Model:
         mp_drawing.draw_landmarks(
             image,
             hand_landmarks,
-            mp_hands.HAND_CONNECTIONS
+            mp_hands.HAND_CONNECTIONS,
+            mp_drawing_styles.get_default_hand_landmarks_style(),
+            mp_drawing_styles.get_default_hand_connections_style()
         )
 
     @staticmethod
     def Detect_hand_type(hand_type, results, positions, copie_img):
+        land_mark = np.zeros(21 * 3)
         for hand_index, hand_info in enumerate(results.multi_handedness):
             hand_types = hand_info.classification[0].label
             if hand_types == hand_type:
@@ -58,9 +63,10 @@ class Base_Model:
                         alto, ancho, c = copie_img.shape
                         positions.append((lm.x * ancho, lm.y * alto, lm.z * ancho))
                         # Base_Model.Draw_landmarks(copie_img, hand_landmarks)
-        return positions
+                        land_mark = np.array([lm.x, lm.y, lm.z]).flatten()
+        return positions, land_mark
 
-    def Draw_Bound_Boxes(self, positions, frame, prediction):
+    def Draw_Bound_Boxes(self, positions, frame):
         x_min = int(min(positions, key=lambda x: x[0])[0])
         y_min = int(min(positions, key=lambda x: x[1])[1])
         x_max = int(max(positions, key=lambda x: x[0])[0])
@@ -74,7 +80,7 @@ class Base_Model:
                 frame.shape[1]:
             cv2.rectangle(frame, (x1 - self.offset - 50, y1 - self.offset - 25), (x2 - self.offset + 90, y2 - self.offset + 50),
                           (0, 255, 0), 3)
-            cv2.putText(frame, prediction, (x1, y1 - 50), cv2.FONT_HERSHEY_COMPLEX, 1.7, (255, 255, 255), 2)
+            # cv2.putText(frame, prediction, (x1, y1 - 50), cv2.FONT_HERSHEY_COMPLEX, 1.7, (255, 255, 255), 2)
             # imgHand = copie_img[y1 - offset - 25:y2 - offset + 50, x1 - offset - 50:x2 - offset + 90].copy()
             # return imgHand
 
@@ -97,7 +103,7 @@ class Base_Model:
         resized_hand = copie_img[y1:y2, x1:x2]
         # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
         resized_hand = cv2.resize(resized_hand, (self.imgSize, self.imgSize), interpolation=cv2.INTER_CUBIC)
-        cv2.imshow("Video", resized_hand)
+        cv2.imshow("hand", resized_hand)
         return resized_hand
 
     def Create_datasets_dir(self):
@@ -107,14 +113,13 @@ class Base_Model:
             except:
                 pass
 
-    def Save_resized_hand(self, resized_hand, count):
+    def Save_resized_hand(self, resized_hand, count, hand_type):
         for action in self.actions:
             for sequence in range(self.save_frequency):
-                image_path = os.path.join(self.DATA_PATH, action, f'sequence {sequence} frame {count}.png')
+                image_path = os.path.join(self.DATA_PATH, action, f'sequence {sequence} capture {hand_type} {count}.png')
                 cv2.imwrite(image_path, resized_hand)
         if count >= self.size_data / self.save_frequency:
             exit(0)
-
 
 
 #----------------------------------------------------------------
